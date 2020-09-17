@@ -262,7 +262,7 @@ class Ps_Customtext_Test extends Module implements WidgetInterface
 
         return $this->fetch($this->templateFile, $this->getCacheId('ps_customtext_test'));
     }
-    public function getWidgetVariables($hookName = null, array $configuration = [])
+    public function getWidgetVariables()
     {
         $sql = 'SELECT * FROM `'._DB_PREFIX_.'info_test_lang`
             WHERE `id_lang` = '.(int)$this->context->language->id.' AND  `id_shop` = '.(int)$this->context->shop->id;
