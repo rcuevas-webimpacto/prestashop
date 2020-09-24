@@ -214,17 +214,17 @@ class Weather extends Module
         $this->context->controller->addJS($this->_path.'/views/js/front.js');
         $this->context->controller->addCSS($this->_path.'/views/css/front.css');
 
-        /*//UBICACION 
+        //UBICACION 
         // This creates the Reader object, which should be reused across lookups.
         $reader = new GeoIp2\Database\Reader("app/Resources/geoip/GeoLite2-City.mmdb");
         //Replace "city" with the appropriate method for your database, e.g., "country".
         $record = $reader->city($this->getIP());
         $defcity=new City($record);
-        $cityName=print($defcity->city->name); // 'Minneapolis'*/
+        $cityName=print($defcity->city->name); // 'Minneapolis'
 
         //MOSTRAR API
         $handle = curl_init();
-        $url = "http://api.openweathermap.org/data/2.5/weather?q=Madrid&appid=eea09d8df75afa33278174460f88bd02";
+        $url = "http://api.openweathermap.org/data/2.5/weather?q=".$cityName."&appid=eea09d8df75afa33278174460f88bd02";
         
         // Set the url
         curl_setopt($handle, CURLOPT_URL, $url);
@@ -242,11 +242,4 @@ class Weather extends Module
 
         return $this->display(__FILE__, 'weather.tpl');
     }
-}
-
-/*public function hookDisplayNav2($params)
-{
-    $variable = file_get_contents('http://api.weatherapi.com/v1/current.json?key=AQUITUAPIq=Madrid');
-    $resultado = json_decode($variable);
-    return $variable;
 }
