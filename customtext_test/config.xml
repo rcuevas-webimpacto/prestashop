@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <module>
-    <name>custom_text</name>
+    <name>customtext_test</name>
     <displayName><![CDATA[Custom text]]></displayName>
     <version><![CDATA[4.1.0]]></version>
     <description><![CDATA[Adds custom information block in your store.]]></description>
