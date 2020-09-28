@@ -32,11 +32,11 @@ class Product extends ProductCore {
 
     public function __construct($id_product = null, $full = false, $id_lang = null, $id_shop = null, \Context $context = null) {
 
-        self::$definition['fields']['custom_field_lang_wysiwyg'] = array(
-            'type' => self::TYPE_HTML, 
+        self::$definition['fields']['input_product'] = array(
+            'type' => self::TYPE_STRING, 
             'lang' => true,
             'required' => false,
-            'validate' => 'idCleanHtml');
+            'size' => 255);
         parent::__construct($id_product, $full, $id_lang, $id_shop,$context);
     }
 }

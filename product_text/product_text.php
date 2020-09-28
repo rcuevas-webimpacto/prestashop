@@ -24,18 +24,18 @@
 *  International Registered Trademark & Property of PrestaShop SA
 */
 
+use PhpCsFixer\Config;
+
 if (!defined('_PS_VERSION_')) {
     exit;
 }
 
 class Product_text extends Module
 {
-    protected $config_form = false;
-
     public function __construct()
     {
         $this->name = 'product_text';
-        $this->tab = 'front_office_features'; //'others';
+        $this->tab = 'front_office_features';
         $this->version = '1.0.0';
         $this->author = 'rcuevas-webimpacto';
         $this->need_instance = 0;
@@ -61,14 +61,13 @@ class Product_text extends Module
      */
     public function install()
     {
+
         include(dirname(__FILE__).'/sql/install.php');
 
         return parent::install() && $this->_installSql() &&
-            $this->registerHook('adminProductsExtra') &&
             $this->registerHook('actionProductSave') &&
-            $this->registerHook('actionProductUpdate') &&
-            $this->registerHook('adminProductsMainStepLeftColumnMiddle') &&
-            $this->registerHook('productAdditionalInfo');
+			$this->registerHook('displayProductButtons') &&
+			$this->registerHook('displayAdminProductsMainStepLeftColumnMiddle');
     }
 
     public function uninstall()
@@ -76,64 +75,44 @@ class Product_text extends Module
 
         include(dirname(__FILE__).'/sql/uninstall.php');
 
-        return parent::uninstall(); // && $this->_uninstallSQL();;
-    }
-
-    /**
-     * Modifications sql du module
-     * @return boolean
-     */
-    protected function _installSql() {
-        $sqlInstallLang = "ALTER TABLE " . _DB_PREFIX_ . "product_lang ADD column custom_field_lang_wysiwyg TEXT NULL";
+        return parent::uninstall() && $this->_uninstallSql(); //$this->alterProductTable('remove');
+	}
+	
+	protected function _installSql() {
+        $sqlInstallLang = "ALTER TABLE " . _DB_PREFIX_ . "product_lang ADD column input_product TEXT NULL";
 
         $returnSqlLang = Db::getInstance()->execute($sqlInstallLang);
         
         return  $returnSqlLang;
-    }
+	}
+	
+	protected function _uninstallSql() {
+		$sqlInstallLang = "ALTER TABLE " . _DB_PREFIX_ . "product_lang DROP column input_product";
 
-    /**
-     * Suppression des modification sql du module
-     * @return boolean
-     */
-    /*protected function _unInstallSql() {
-         $sqlInstallLang = "ALTER TABLE " . _DB_PREFIX_ . "product_lang DROP column product_text";
- 
-         $returnSqlLang = Db::getInstance()->execute($sqlInstallLang);
-         
-         return $returnSqlLang;
-     }*/
+		$returnSqlLang = Db::getInstance()->execute($sqlInstallLang);
+		
+		return $returnSqlLang;
+	}
 
-    public function hookDisplayAdminProductsMainStepLeftColumnMiddle($params){
-        $product=new Product($params['id_product']);
-        $languages=Language::getLanguages($active);
-        $this->context->smarty->assign(array(
-            'languages'=>$languages,
-            'custom_field_lang_wysiwyg'=>$product->custom_field_lang_wysiwyg,
-            'default_language'=>$this->context->employee->id_lang,
-        ));
+	public function hookDisplayAdminProductsMainStepLeftColumnMiddle(){
+		return $this->display(__FILE__,'views/templates/hook/product-extra.tpl');
+	}
+	public function hookActionProductSave($params)
+	{
+		$campo=(string)Tools::getValue('input_product');
+		$id=(int)Tools::getValue('id_product');
+		if(Tools::isSubmit('input_product')){
+			Db::getInstance()->update('product_lang',array('input_product'=>$campo), 'id_product = ' .$id);
+		}
+		
+	}
 
-        return $this->display(__FILE__,'views/templates/hook/product-extra.tpl');
-    }
-
-    public function hookActionProductUpdate($params)
-    {
-        $product = new Product($params['id_product']);
-        $id_product = (int)Tools::getValue('id_product');
-        Db::getInstance()->update('product_lang', pSQL(Tools::getValue('product_text'),'id_product = ' .$id_product));
-        $this->context->controller->_errors[] = Tools::displayError('Error');
-        return $this->hookDisplayProductAdditionalInfo(__FUNCTION__);
-    
-    }
-
-    public function hookDisplayProductAdditionalInfo($params)
-    {
-        /* Place your code here. */
-        $product=new Product($params['id_product']);
-        $this->context->controller->addJS($this->_path.'/views/js/front.js');
-        $this->context->controller->addCSS($this->_path.'/views/css/front.css');
-        $this->smarty->assign(array(
-            'custom_field_lang_wysiwyg' => $product->custom_field_lang_wysiwyg,
-        ));
-        return $this->display(__FILE__,'views/templates/hook/product_text.tpl');
-    }
+	public function hookDisplayProductButtons()
+	{
+		$input_product= Db::getInstance()->execute("SELECT input_product from "._DB_PREFIX_."product_lang where id_product = ".(int)Tools::getValue('id_product'));
+		$this->smarty->assign(array(
+			$input_product=>$this->input_product));
+		return $this->display(__FILE__, 'views/templates/hook/product_text.tpl');
+	}
+	
 }
