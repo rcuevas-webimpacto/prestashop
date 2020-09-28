@@ -35,7 +35,7 @@ class Product_text extends Module
     public function __construct()
     {
         $this->name = 'product_text';
-        $this->tab = 'others'; //'front_office_features';
+        $this->tab = 'front_office_features'; //'others';
         $this->version = '1.0.0';
         $this->author = 'rcuevas-webimpacto';
         $this->need_instance = 0;
@@ -73,11 +73,10 @@ class Product_text extends Module
 
     public function uninstall()
     {
-        //Configuration::deleteByName('PRODUCT_TEXT_LIVE_MODE');
 
         include(dirname(__FILE__).'/sql/uninstall.php');
 
-        return parent::uninstall() && $this->_uninstallSQL();;
+        return parent::uninstall(); // && $this->_uninstallSQL();;
     }
 
     /**
@@ -96,110 +95,13 @@ class Product_text extends Module
      * Suppression des modification sql du module
      * @return boolean
      */
-    protected function _unInstallSql() {
+    /*protected function _unInstallSql() {
          $sqlInstallLang = "ALTER TABLE " . _DB_PREFIX_ . "product_lang DROP column product_text";
  
          $returnSqlLang = Db::getInstance()->execute($sqlInstallLang);
          
          return $returnSqlLang;
-     }
-
-    /**
-     * Load the configuration form
-     */
-    public function getContent()
-    {
-        /**
-         * If values have been submitted in the form, process.
-         */
-        if (((bool)Tools::isSubmit('submitProduct_textModule')) == true) {
-            $this->postProcess();
-        }
-
-        $this->context->smarty->assign('module_dir', $this->_path);
-
-        $output = $this->context->smarty->fetch($this->local_path.'views/templates/admin/configure.tpl');
-
-        return $output.$this->renderForm();
-    }
-
-    /**
-     * Create the form that will be displayed in the configuration of your module.
-     */
-    protected function renderForm()
-    {
-        $helper = new HelperForm();
-
-        $helper->show_toolbar = false;
-        $helper->table = $this->table;
-        $helper->module = $this;
-        $helper->default_form_language = $this->context->language->id;
-        $helper->allow_employee_form_lang = Configuration::get('PS_BO_ALLOW_EMPLOYEE_FORM_LANG', 0);
-
-        $helper->identifier = $this->identifier;
-        $helper->submit_action = 'submitProduct_textModule';
-        $helper->currentIndex = $this->context->link->getAdminLink('AdminModules', false)
-            .'&configure='.$this->name.'&tab_module='.$this->tab.'&module_name='.$this->name;
-        $helper->token = Tools::getAdminTokenLite('AdminModules');
-
-        $helper->tpl_vars = array(
-            'fields_value' => $this->getConfigFormValues(), /* Add values for your inputs */
-            'languages' => $this->context->controller->getLanguages(),
-            'id_language' => $this->context->language->id,
-        );
-
-        return $helper->generateForm(array($this->getConfigForm()));
-    }
-
-    /**
-     * Create the structure of your form.
-     */
-    protected function getConfigForm()
-    {
-        return array(
-            'form' => array(
-                'legend' => array(
-                'title' => $this->l('Nuevos Ajustes'),
-                'icon' => 'icon-cogs',
-                ),
-                'input' => array(
-                    array(
-                        'type'=>'textarea',
-                        'label'=>$this->l('Nuevo area de texto'),
-                        'name' =>'text_field1',
-                        'desc'=>$this->l('Descripicion del area de texto'),
-                        'autoload_rte'=> true,
-                        'lang'=> true
-                    )
-                ),
-                'submit' => array(
-                    'title' => $this->trans('Save', array(), 'Admin.Actions'),
-                ),
-            ),
-        );
-    }
-
-    /**
-     * Set values for the inputs.
-     */
-    protected function getConfigFormValues()
-    {
-        return array(
-            'text_field1' => Configuration::get('text_field1', true),
-        );
-    }
-
-    /**
-     * Save form data.
-     */
-    protected function postProcess()
-    {
-        $form_values = $this->getConfigFormValues();
-
-        foreach (array_keys($form_values) as $key) {
-            Configuration::updateValue($key, Tools::getValue($key));
-        }
-    }
+     }*/
 
     public function hookDisplayAdminProductsMainStepLeftColumnMiddle($params){
         $product=new Product($params['id_product']);
@@ -223,24 +125,15 @@ class Product_text extends Module
     
     }
 
-    public function hookDisplayAdminProductsExtra()
+    public function hookDisplayProductAdditionalInfo($params)
     {
         /* Place your code here. */
-    }
-
-    public function hookDisplayProductAdditionalInfo()
-    {
-        /* Place your code here. */
-        $product=new Product();
+        $product=new Product($params['id_product']);
         $this->context->controller->addJS($this->_path.'/views/js/front.js');
         $this->context->controller->addCSS($this->_path.'/views/css/front.css');
         $this->smarty->assign(array(
-            'text_field1'=>$product->field->text_field1,
+            'custom_field_lang_wysiwyg' => $product->custom_field_lang_wysiwyg,
         ));
-        return $this->display(__FILE__,'product-extra.tpl');
+        return $this->display(__FILE__,'views/templates/hook/product_text.tpl');
     }
 }
-//actionProductSave
-//actionProductUpdate
-//displayAdminProductsMainStepRightColumnBottom
-//displayProductAdditionalInfo

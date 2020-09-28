@@ -24,5 +24,5 @@
  *}
 
 <div class="form-group">
-    <p>{$custom_field_lang_wysiwyg}</p>
+    <p>{$custom_field_lang_wysiwyg nofilter}</p>
 </div>
