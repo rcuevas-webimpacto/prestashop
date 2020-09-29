@@ -24,5 +24,5 @@
  *}
 
 <div class="form-group">
-    <p>El texto es: {$input_product}</p>
+    <p>El texto es: {{$product->input_product|escape:'htmlall':'UTF-8'}}</p>
 </div>
