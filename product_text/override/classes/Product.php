@@ -27,16 +27,18 @@
 if (!defined('_PS_VERSION_')) {
     exit;
 }
-class Product extends ProductCore {
-    public $custom_field_lang_wysiwyg;
 
-    public function __construct($id_product = null, $full = false, $id_lang = null, $id_shop = null, \Context $context = null) {
+class Product extends ProductCore {
+    public $input_product;
+
+    public function __construct($id_product = null, $full = false, $id_lang = null, $id_shop = null, \Context $context = null)
+    {
 
         self::$definition['fields']['input_product'] = array(
-            'type' => self::TYPE_STRING, 
+            'type' => self::TYPE_STRING,
             'lang' => true,
             'required' => false,
             'size' => 255);
-        parent::__construct($id_product, $full, $id_lang, $id_shop,$context);
+        parent::__construct($id_product, $full, $id_lang, $id_shop, $context);
     }
 }

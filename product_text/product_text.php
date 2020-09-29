@@ -30,7 +30,7 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
-class Product_text extends Module
+class Product_Text extends Module
 {
     public function __construct()
     {
@@ -95,16 +95,15 @@ class Product_text extends Module
 	}
 
 	public function hookDisplayAdminProductsMainStepLeftColumnMiddle(){
-		return $this->display(__FILE__,'views/templates/hook/product-extra.tpl');
+		return $this->display(__FILE__, 'views/templates/hook/product-extra.tpl');
 	}
 	public function hookActionProductSave($params)
 	{
 		$campo=(string)Tools::getValue('input_product');
 		$id=(int)Tools::getValue('id_product');
-		if(Tools::isSubmit('input_product')){
-			Db::getInstance()->update('product_lang',array('input_product'=>$campo), 'id_product = ' .$id);
+		if(Tools::isSubmit('input_product')) {
+			Db::getInstance()->update('product_lang', array('input_product'=>$campo), 'id_product = ' .$id);
 		}
-		
 	}
 
 	public function hookDisplayProductButtons()
@@ -114,5 +113,4 @@ class Product_text extends Module
 			$input_product=>$this->input_product));
 		return $this->display(__FILE__, 'views/templates/hook/product_text.tpl');
 	}
-	
 }
