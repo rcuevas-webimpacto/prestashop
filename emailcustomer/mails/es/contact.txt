@@ -1,0 +1,1 @@
+Hola {firstname} {lastname} has gastado {total} en {shopname}
