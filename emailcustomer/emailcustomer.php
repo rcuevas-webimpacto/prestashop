@@ -94,9 +94,12 @@ class Emailcustomer extends Module
         $this->context->smarty->assign('module_dir', $this->_path);
 
         //
-        $dbcontent=Db::getInstance()->executeS("SELECT * from "._DB_PREFIX_."emailcustomer");
-        $res=mysqli_fetch_assoc($dbcontent);
-        $this->smarty->assign('result', $res);
+        $moneydiscount=(int)(Tools::getValue('moneydiscount'));
+        $discount=(int)(Tools::getValue('discount'));
+        $codediscount=(string)(Tools::getValue('codediscount'));
+        $user_id=(int)(Tools::getValue('user_id'));
+        $dbcontent=Db::getInstance()->executeS("SELECT `moneydiscount`,`discount`,`codediscount`,`user_id` from "._DB_PREFIX_."emailcustomer");
+        $smarty=$this->smarty->assign('data',$dbcontent);
         //
 
         $output = $this->context->smarty->fetch($this->local_path.'views/templates/admin/configure.tpl');

@@ -35,12 +35,12 @@
 			</tr>
 		</thead>
 		<tbody>
-			{foreach $result as $r}
+			{foreach from=$data item=r}
 			<tr>
-				<td name="user_id">{$r.user_id}</td>
-				<td name="moneydiscount">{$r.moneydiscount}</td>
-				<td name="discount">{$r.discount}</td>
-				<td name="codediscount">{$r.codediscount}</td>
+				<td name="user_id"> {$r.user_id} </td>
+				<td name="moneydiscount"> {$r.moneydiscount} </td>
+				<td name="discount"> {$r.discount} </td>
+				<td name="codediscount"> {$r.codediscount} </td>
 			</tr>
 			{/foreach}
 		</tbody>
