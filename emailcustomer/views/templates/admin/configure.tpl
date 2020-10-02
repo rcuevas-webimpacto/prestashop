@@ -25,22 +25,24 @@
 
 <div class="panel">
 	<h3><i class="icon icon-tags"></i>{l s="Configuracion del cupon de descuento" mod="emailcustomer"}</h3>
-	<table>
+	<table class="table">
 		<thead>
 			<tr>
 				<th scope="col">{l s="ID Usuario" mod="emailcustomer"}</th>
 				<th scope="col">{l s="Cantidad de dinero requerida" mod="emailcustomer"}</th>
 				<th scope="col">{l s="Descuento en €" mod="emailcustomer"}</th>
 				<th scope="col">{l s="Código descuento" mod="emailcustomer"}</th>			
-			</tr>		
+			</tr>
 		</thead>
-		<tbody>{*
+		<tbody>
+			{foreach $result as $r}
 			<tr>
-				<td name="user_id">{$user_id}</td>
-				<td name="moneydiscount">{$moneydiscount}</td>
-				<td name="discount">{$discount}</td>
-				<td name="codediscount">{$codediscount}</td>
-			</tr>*}
+				<td name="user_id">{$r.user_id}</td>
+				<td name="moneydiscount">{$r.moneydiscount}</td>
+				<td name="discount">{$r.discount}</td>
+				<td name="codediscount">{$r.codediscount}</td>
+			</tr>
+			{/foreach}
 		</tbody>
 	</table>
 </div>

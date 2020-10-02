@@ -93,18 +93,12 @@ class Emailcustomer extends Module
 
         $this->context->smarty->assign('module_dir', $this->_path);
 
-        /*$moneydiscount=(int)(Tools::getValue('moneydiscount'));
-        $discount=(int)(Tools::getValue('discount'));
-        $codediscount=(string)(Tools::getValue('codediscount'));
-        $user_id=(int)(Tools::getValue('user_id'));
-        $dbcontent=Db::getInstance()->execute("SELECT * from "._DB_PREFIX_."emailcustomer");
-		$this->smarty->assign(array(
-            'moneydiscount'=>$moneydiscount,
-            'discount'=>$discount,
-            'codediscount'=>$codediscount,
-            'user_id'=>$user_id,
-            ));
-        */
+        //
+        $dbcontent=Db::getInstance()->executeS("SELECT * from "._DB_PREFIX_."emailcustomer");
+        $res=mysqli_fetch_assoc($dbcontent);
+        $this->smarty->assign('result', $res);
+        //
+
         $output = $this->context->smarty->fetch($this->local_path.'views/templates/admin/configure.tpl');
 
         return $output.$this->renderForm();
@@ -245,22 +239,23 @@ class Emailcustomer extends Module
         $user_id=(int)(Tools::getValue('user_id'));
 
         $customer=$params['customer'];
-        $order=$params['order'];
+        //$order=$params['order'];
         $shopemail=Configuration::get('PS_SHOP_EMAIL');
         $shopname=Configuration::get('PS_SHOP_NAME');
-        $total_paid=$order->total_paid;
+        $sumpaid=Db::getInstance()->executeS("SELECT SUM(`total_paid`) AS `sumpaid` from `"._DB_PREFIX_."orders` WHERE `id_customer`=3 && `current_state`=2");
+        //$total_paid=$order->total_paid;
         $idLang=(int)(Configuration::get('PS_LANG_DEFAULT'));
         $subject=sprintf(Mail::l('Pedido n. %d cofirmado'), $params['order']->id);
         $templateVars=array(
             '{firstname}'=>$customer->firstname,
             '{lastname}'=>$customer->lastname,
             '{email}'=>$customer->email,
-            '{total}'=>$total_paid,
+            '{sumpaid}'=>$sumpaid,
             '{shopname}'=>$shopname,
         );
         $templatePath=_PS_MAIL_DIR_;//_PS_ROOT_DIR_.'/modules/emailcustomer/mails/es/contact.html';
 
-        if($total_paid < $moneydiscount && $user_id==$customer->id){
+        if($sumpaid < $moneydiscount && $user_id==$customer->id){
             Mail::Send(
                 $idLang, //defaut language id
                 'contact', //email template file to be use
@@ -282,7 +277,7 @@ class Emailcustomer extends Module
             );
         }
 
-        else if($total_paid >= $moneydiscount && $user_id==$customer->id) {
+        else if($sumpaid >= $moneydiscount && $user_id==$customer->id) {
             $cr = new CartRule();
             $cr->date_from = date('Y-m-d H:i:s');
             $cr->date_to = '2050-12-31 00:00:00';
@@ -318,9 +313,8 @@ class Emailcustomer extends Module
         else {
             return 'Error en el cupon';
         }
-        /*return $this->display(__FILE__,'mails');
 
-        $mensaje= '
+        /*$mensaje= '
         <!DOCTYPE html>
         <html>
             <head>
