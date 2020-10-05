@@ -65,9 +65,9 @@ class Product_Text extends Module
         include(dirname(__FILE__).'/sql/install.php');
 
         return parent::install() && $this->_installSql() &&
-            $this->registerHook('actionProductSave') &&
-			$this->registerHook('displayProductButtons') &&
-			$this->registerHook('displayAdminProductsMainStepLeftColumnMiddle');
+        $this->registerHook('actionProductSave') &&
+        $this->registerHook('displayProductButtons') &&
+        $this->registerHook('displayAdminProductsMainStepLeftColumnMiddle');
     }
 
     public function uninstall()
@@ -78,7 +78,8 @@ class Product_Text extends Module
         return parent::uninstall() && $this->_uninstallSql(); //$this->alterProductTable('remove');
 	}
 	
-	protected function _installSql() {
+    protected function _installSql()
+    {
         $sqlInstallLang = "ALTER TABLE " . _DB_PREFIX_ . "product_lang ADD column input_product TEXT NULL";
 
         $returnSqlLang = Db::getInstance()->execute($sqlInstallLang);
@@ -86,7 +87,8 @@ class Product_Text extends Module
         return  $returnSqlLang;
 	}
 	
-	protected function _uninstallSql() {
+    protected function _uninstallSql()
+    {
 		$sqlInstallLang = "ALTER TABLE " . _DB_PREFIX_ . "product_lang DROP column input_product";
 
 		$returnSqlLang = Db::getInstance()->execute($sqlInstallLang);
@@ -94,14 +96,16 @@ class Product_Text extends Module
 		return $returnSqlLang;
 	}
 
-	public function hookDisplayAdminProductsMainStepLeftColumnMiddle(){
+    public function hookDisplayAdminProductsMainStepLeftColumnMiddle()
+    {
 		return $this->display(__FILE__, 'views/templates/hook/product-extra.tpl');
-	}
+    }
+    
 	public function hookActionProductSave($params)
 	{
 		$campo=(string)Tools::getValue('input_product');
 		$id=(int)Tools::getValue('id_product');
-		if(Tools::isSubmit('input_product')) {
+		if (Tools::isSubmit('input_product')) {
 			Db::getInstance()->update('product_lang', array('input_product'=>$campo), 'id_product = ' .$id);
 		}
 	}

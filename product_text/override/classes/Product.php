@@ -28,7 +28,8 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
-class Product extends ProductCore {
+class Product extends ProductCore
+{
     public $input_product;
 
     public function __construct($id_product = null, $full = false, $id_lang = null, $id_shop = null, \Context $context = null)

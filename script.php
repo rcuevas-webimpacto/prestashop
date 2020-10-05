@@ -17,11 +17,10 @@ if (($gestor = fopen(_PS_ROOT_DIR_ . "/miscsv/products.csv", "r")) !== FALSE) {
         $numero = count($datos);
         //echo "<p> $numero de campos en la línea $fila: <br /></p>\n";
         $fila++;
-        if($fila){
+        if ($fila) {
             $fila = false;
             continue;
-        }
-        for ($c=0; $c < $numero; $c++) {
+        } for ($c=0; $c < $numero; $c++) {
             echo $datos[$c] . "<br />\n";
         }
         
