@@ -93,8 +93,10 @@ class Emailcustomer extends Module
 
         $this->context->smarty->assign('module_dir', $this->_path);
 
-        //
-        $dbcontent=Db::getInstance()->executeS("SELECT `moneydiscount`,`discount`,`codediscount`,`user_id` from "._DB_PREFIX_."emailcustomer");
+        //select query works fine but I added query with left outer join
+        //$dbcontent=Db::getInstance()->executeS("SELECT `moneydiscount`,`discount`,`codediscount`,`user_id`,`date` from "._DB_PREFIX_."emailcustomer order by `user_id` asc");
+        //left outer join query
+        $dbcontent=Db::getInstance()->executeS("SELECT ps_emailcustomer.moneydiscount,ps_emailcustomer.discount,ps_emailcustomer.codediscount,ps_emailcustomer.user_id,ps_emailcustomer.date,ps_customer.email from ps_emailcustomer left outer join ps_customer on ps_emailcustomer.user_id=ps_customer.id_customer order by ps_emailcustomer.user_id asc");
         $this->context->smarty->assign('dbcontent', $dbcontent);
         //
 

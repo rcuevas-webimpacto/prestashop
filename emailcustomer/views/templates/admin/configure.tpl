@@ -29,9 +29,11 @@
 		<thead>
 			<tr>
 				<th scope="col">{l s="ID Usuario" mod="emailcustomer"}</th>
+				<th scope="col">{l s="Email" mod="emailcustomer"}</th>
 				<th scope="col">{l s="Cantidad de dinero requerida" mod="emailcustomer"}</th>
 				<th scope="col">{l s="Descuento en €" mod="emailcustomer"}</th>
-				<th scope="col">{l s="Código descuento" mod="emailcustomer"}</th>			
+				<th scope="col">{l s="Código descuento" mod="emailcustomer"}</th>
+				<th scope="col">{l s="Acción #" mod="emailcustomer"}</th>			
 			</tr>
 		</thead>
 		<tbody>
@@ -39,9 +41,11 @@
 			{foreach from=$dbcontent key=key item=r}
 			<tr>
 				<td name="user_id"> {$r['user_id']} </td>
+				<td name="email"> {$r['email']} </td>
 				<td name="moneydiscount"> {$r['moneydiscount']} </td>
 				<td name="discount"> {$r['discount']} </td>
 				<td name="codediscount"> {$r['codediscount']} </td>
+				<td name="buttons"><a href="#" class="" onclick="#" data-toggle="tooltip" data-placement="right" title="Desactivado"><i class="icon-trash"></i></a></td>
 			</tr>
 			{/foreach}
 		{else}
