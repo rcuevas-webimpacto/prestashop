@@ -275,7 +275,7 @@ class Emailcustomer extends Module
                 null, //receiver name
                 $shopemail, //from email address
                 $shopname,  //from name
-                null, 
+                null,
                 true, //mode smtp
                 _PS_ROOT_DIR_.'/modules/emailcustomer/mails', //custom template path
                 false, //die
@@ -293,7 +293,7 @@ class Emailcustomer extends Module
                 null, //receiver name
                 $shopemail, //from email address
                 $shopname,  //from name
-                null, 
+                null,
                 true, //mode smtp
                 _PS_ROOT_DIR_.'/modules/emailcustomer/mails', //custom template path
                 false, //die
