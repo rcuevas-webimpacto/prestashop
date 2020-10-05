@@ -35,14 +35,18 @@
 			</tr>
 		</thead>
 		<tbody>
-			{foreach from=$data item=r}
+		{if dbcontent}
+			{foreach from=$dbcontent key=key item=r}
 			<tr>
-				<td name="user_id"> {$r.user_id} </td>
-				<td name="moneydiscount"> {$r.moneydiscount} </td>
-				<td name="discount"> {$r.discount} </td>
-				<td name="codediscount"> {$r.codediscount} </td>
+				<td name="user_id"> {$r['user_id']} </td>
+				<td name="moneydiscount"> {$r['moneydiscount']} </td>
+				<td name="discount"> {$r['discount']} </td>
+				<td name="codediscount"> {$r['codediscount']} </td>
 			</tr>
 			{/foreach}
+		{else}
+			<p>No hay cupones</p>
+		{/if}
 		</tbody>
 	</table>
 </div>
