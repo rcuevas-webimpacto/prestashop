@@ -236,51 +236,24 @@ class Emailcustomer extends Module
 
     public function hookActionValidateOrder($params)
     {
-        $moneydiscount=(int)(Tools::getValue('moneydiscount'));
-        $discount=(int)(Tools::getValue('discount'));
-        $codediscount=(string)(Tools::getValue('codediscount'));
-        $user_id=(int)(Tools::getValue('user_id'));
+        $id_customer=$this->context->customer->id;
 
-        $customer=$params['customer'];
-        //$order=$params['order'];
+        $moneydiscount=Db::getInstance()->executeS("SELECT `moneydiscount` from `"._DB_PREFIX_."emailcustomer` WHERE `user_id`=".$id_customer."");
+        $discount=Db::getInstance()->executeS("SELECT `discount` from `"._DB_PREFIX_."emailcustomer` WHERE `user_id`=".$id_customer."");
+        $codediscount=Db::getInstance()->executeS("SELECT `codediscount` from `"._DB_PREFIX_."emailcustomer` WHERE `user_id`=".$id_customer."");
+
+        $idLang=(int)(Configuration::get('PS_LANG_DEFAULT'));
         $shopemail=Configuration::get('PS_SHOP_EMAIL');
         $shopname=Configuration::get('PS_SHOP_NAME');
-        $sumpaid=Db::getInstance()->executeS("SELECT SUM(`total_paid`) AS `sumpaid` from `"._DB_PREFIX_."orders` WHERE `id_customer`=3 && `current_state`=2");
-        //$total_paid=$order->total_paid;
-        $idLang=(int)(Configuration::get('PS_LANG_DEFAULT'));
-        $subject=sprintf(Mail::l('Pedido n. %d cofirmado'), $params['order']->id);
+        $sumpaid=Db::getInstance()->executeS("SELECT SUM(`total_paid`) AS `sumpaid` from `"._DB_PREFIX_."orders` WHERE `id_customer`=".$id_customer." && `current_state`=2");
         $templateVars=array(
-            '{firstname}'=>$customer->firstname,
-            '{lastname}'=>$customer->lastname,
-            '{email}'=>$customer->email,
+            '{firstname}'=>$this->context->customer->firstname,
+            '{lastname}'=>$this->context->customer->lastname,
             '{sumpaid}'=>$sumpaid,
-            '{shopname}'=>$shopname,
+            '{codediscount}'=>$codediscount,
         );
-        $templatePath=_PS_MAIL_DIR_;//_PS_ROOT_DIR_.'/modules/emailcustomer/mails/es/contact.html';
 
-        if($sumpaid < $moneydiscount && $user_id==$customer->id){
-            Mail::Send(
-                $idLang, //defaut language id
-                'contact', //email template file to be use
-                $subject, //email subject
-                $templateVars, //email vars
-                $customer->email, //receiver email address
-                NULL, //receiver name
-                $shopemail, //from email address
-                $shopname,  //from name
-                array(
-                    'Content-type: text/html; charset=iso-8859-1'."\r\n",
-                    'MIME-Version: 1.0'."\r\n",
-                    'contact'
-                ), //file attachment
-                true, //mode smtp
-                $templatePath, //custom template path
-                false, //die
-                Configuration::get('PS_SHOP_ID') //shop id
-            );
-        }
-
-        else if($sumpaid >= $moneydiscount && $user_id==$customer->id) {
+        if($sumpaid >= $moneydiscount) {
             $cr = new CartRule();
             $cr->date_from = date('Y-m-d H:i:s');
             $cr->date_to = '2050-12-31 00:00:00';
@@ -290,52 +263,53 @@ class Emailcustomer extends Module
             $cr->discount = $discount;
             $cr->free_shipping = false;
             $cr->active = true;
-            $cr->id_customer = $customer->id;
+            $cr->id_customer = $this->context->customer->id;
             $cr->add();
 
             Mail::Send(
                 $idLang, //defaut language id
                 'descuento', //email template file to be use
-                $subject, //email subject
+                'Cupon descuento', //email subject
                 $templateVars, //email vars
-                $customer->email, //receiver email address
+                $this->context->customer->email, //receiver email address
                 NULL, //receiver name
                 $shopemail, //from email address
                 $shopname,  //from name
-                array(
+                NULL,/*array(
                     'Content-type: text/html; charset=iso-8859-1'."\r\n",
                     'MIME-Version: 1.0'."\r\n",
                     'contact'
-                ), //file attachment
+                ), //file attachment*/
                 true, //mode smtp
-                $templatePath, //custom template path
+                _PS_ROOT_DIR_.'/modules/emailcustomer/mails', //custom template path
                 false, //die
-                Configuration::get('PS_SHOP_ID') //shop id
+                NULL, //shop id
+                NULL,
+                NULL
             );
         }
         else {
-            return 'Error en el cupon';
+            Mail::Send(
+                $idLang, //defaut language id
+                'contact', //email template file to be use
+                'Total gastado', //email subject
+                $templateVars, //email vars
+                $this->context->customer->email, //receiver email address
+                NULL, //receiver name
+                $shopemail, //from email address
+                $shopname,  //from name
+                NULL,/*array(
+                    'Content-type: text/html; charset=iso-8859-1'."\r\n",
+                    'MIME-Version: 1.0'."\r\n",
+                    'contact'
+                ), //file attachment*/
+                true, //mode smtp
+                _PS_ROOT_DIR_.'/modules/emailcustomer/mails', //custom template path
+                false, //die
+                NULL, //shop id
+                NULL,
+                NULL
+            );
         }
-
-        /*$mensaje= '
-        <!DOCTYPE html>
-        <html>
-            <head>
-                <title>Pedido</title>
-            </head>
-            <body>
-                <div class="row">
-                    <div class="col-12">
-                        <p>Hola {firstname} {lastname} has gastado {total} € en {shopname}</p>
-                    </div>
-                </div>
-            </body>
-        </html>
-        ';
-        $headers='MIME-Version: 1.0' . "\r\n";
-        $headers .= 'From: '.$shopemail.'' . "\r\n";
-        $headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
-
-        mail($customer->email,$subject,$mensaje,$headers);*/
     }
 }

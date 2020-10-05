@@ -1,1 +1,1 @@
-Hola {firstname} {lastname} has gastado {sumpaid} en {shopname}
+Hola {firstname} {lastname} has gastado {sumpaid}

@@ -1,1 +1,1 @@
-Hola {name} has gastado {total_paid} en {shopname}
+Hola {name} has gastado {total_paid}
