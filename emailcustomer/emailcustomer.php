@@ -69,11 +69,11 @@ class Emailcustomer extends Module
     {
         include(dirname(__FILE__).'/sql/uninstall.php');
 
-        return parent::uninstall() && $this->_uninstallSql();
-        
+        return parent::uninstall() && $this->uninstallSql();
     }
 
-    protected function _uninstallSql(){
+    protected function uninstallSql()
+    {
         $sqluninstall=Db::getInstance()->execute('DROP TABLE IF EXISTS '._DB_PREFIX_.'emailcustomer');
 
         return $sqluninstall;
@@ -87,19 +87,19 @@ class Emailcustomer extends Module
         /**
          * If values have been submitted in the form, process.
          */
-        if (((bool)Tools::isSubmit('guardar')) == true) { //submitEmailcustomerModule 
+        if (((bool)Tools::isSubmit('guardar')) == true) { //submitEmailcustomerModule
             $this->postProcess();
         }
 
         $this->context->smarty->assign('module_dir', $this->_path);
 
-        //
+        /*
         $moneydiscount=(int)(Tools::getValue('moneydiscount'));
         $discount=(int)(Tools::getValue('discount'));
         $codediscount=(string)(Tools::getValue('codediscount'));
-        $user_id=(int)(Tools::getValue('user_id'));
+        $user_id=(int)(Tools::getValue('user_id'));*/
         $dbcontent=Db::getInstance()->executeS("SELECT `moneydiscount`,`discount`,`codediscount`,`user_id` from "._DB_PREFIX_."emailcustomer");
-        $smarty=$this->smarty->assign('data',$dbcontent);
+        $smarty=$this->smarty->assign('data', $dbcontent);
         //
 
         $output = $this->context->smarty->fetch($this->local_path.'views/templates/admin/configure.tpl');
@@ -224,8 +224,8 @@ class Emailcustomer extends Module
         $codediscount=(string)(Tools::getValue('codediscount'));
         $user_id=(int)(Tools::getValue('user_id'));
 
-        if(Tools::isSubmit('guardar')){
-            Db::getInstance()->insert('emailcustomer',array(
+        if (Tools::isSubmit('guardar')) {
+            Db::getInstance()->insert('emailcustomer', array(
                 'moneydiscount'=>$moneydiscount,
                 'discount'=>$discount,
                 'codediscount'=>$codediscount,
@@ -253,7 +253,7 @@ class Emailcustomer extends Module
             '{codediscount}'=>$codediscount,
         );
 
-        if($sumpaid >= $moneydiscount) {
+        if ($sumpaid >= $moneydiscount) {
             $cr = new CartRule();
             $cr->date_from = date('Y-m-d H:i:s');
             $cr->date_to = '2050-12-31 00:00:00';
@@ -272,43 +272,34 @@ class Emailcustomer extends Module
                 'Cupon descuento', //email subject
                 $templateVars, //email vars
                 $this->context->customer->email, //receiver email address
-                NULL, //receiver name
+                null, //receiver name
                 $shopemail, //from email address
                 $shopname,  //from name
-                NULL,/*array(
-                    'Content-type: text/html; charset=iso-8859-1'."\r\n",
-                    'MIME-Version: 1.0'."\r\n",
-                    'contact'
-                ), //file attachment*/
+                null, 
                 true, //mode smtp
                 _PS_ROOT_DIR_.'/modules/emailcustomer/mails', //custom template path
                 false, //die
-                NULL, //shop id
-                NULL,
-                NULL
+                null, //shop id
+                null,
+                null
             );
-        }
-        else {
+        } else {
             Mail::Send(
                 $idLang, //defaut language id
                 'contact', //email template file to be use
                 'Total gastado', //email subject
                 $templateVars, //email vars
                 $this->context->customer->email, //receiver email address
-                NULL, //receiver name
+                null, //receiver name
                 $shopemail, //from email address
                 $shopname,  //from name
-                NULL,/*array(
-                    'Content-type: text/html; charset=iso-8859-1'."\r\n",
-                    'MIME-Version: 1.0'."\r\n",
-                    'contact'
-                ), //file attachment*/
+                null, 
                 true, //mode smtp
                 _PS_ROOT_DIR_.'/modules/emailcustomer/mails', //custom template path
                 false, //die
-                NULL, //shop id
-                NULL,
-                NULL
+                null, //shop id
+                null,
+                null
             );
         }
     }
