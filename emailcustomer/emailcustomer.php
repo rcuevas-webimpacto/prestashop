@@ -438,11 +438,11 @@ class Emailcustomer extends Module
     {
         $customer_id=$params['cart']->id_customer;
         $coupon=Db::getInstance()->executeS("SELECT cuponcode, MAX(id) FROM ps_cuponglobal WHERE id_customer= ".$customer_id."");
-        $this->context->smarty->assign('coupon',$coupon); 
+        $this->context->smarty->assign('coupon',$coupon);
         $this->context->smarty->assign(array(
             'urlcss'=>$this->_path.'/views/css/scratch.scss',
             'urljs'=>$this->_path.'/views/js/scratch.js',
         ));
         return $this->display(__FILE__,'views/templates/hook/scratch.tpl');
     }
-} 
+}

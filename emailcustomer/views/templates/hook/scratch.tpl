@@ -35,7 +35,7 @@
                 <canvas id="scratch" width="300" height="60"></canvas>
                 {/foreach}
             {else}
-                <p>No hay cupones</p> 
+                <p>No hay cupones</p>
             {/if}
             </div>
         </div>
