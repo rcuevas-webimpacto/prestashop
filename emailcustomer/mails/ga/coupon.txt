@@ -1,0 +1,7 @@
+Hola {firstname} {lastname},
+
+Se ha generado el código del cupón
+
+Aquí está su nuevo código de cupón: {coupon}
+
+Para utilizarlo, simplemente copie/pegue este código durante el proceso de pago.

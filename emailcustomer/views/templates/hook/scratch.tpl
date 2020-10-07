@@ -1,4 +1,4 @@
-/**
+{*
 * 2007-2020 PrestaShop
 *
 * NOTICE OF LICENSE
@@ -21,34 +21,23 @@
 *  @copyright 2007-2020 PrestaShop SA
 *  @license   http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
 *  International Registered Trademark & Property of PrestaShop SA
-*
-* Don't forget to prefix your containers with your own identifier
-* to avoid any conflicts with others containers.
-*/
+*}
 
-
-.card{
-    width: 300px;
-    height: 60px;
-    position: relative;
-    box-shadow: 1px 2px 6px rgba(0, 0, 0, 0.2);
-     }    
-     
-   .base, #scratch {
-    cursor: default;
-    height: 60px;
-    width: 300px;
-      position: absolute;
-      top: 0;
-      left: 0;
-      cursor: grabbing;
-   }
-   .base {
-    line-height: 60px;
-    text-align: center;
-   }
-   #scratch {
-    -webkit-tap-highlight-color: rgba(0, 0, 0, 0); 
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-   }
+<script src={$urljs} type="text/javascript"></script>
+<link rel="stylesheet" href={$urlcss}>
+<section id="content-hookemailcustomer" class="card mb-3">
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-12">
+            {if coupon}
+                {foreach from=$coupon key=key item=i}
+                <div class="base">20% de descuento<br/>Código descuento: {$i['cuponcode']}</div>
+                <canvas id="scratch" width="300" height="60"></canvas>
+                {/foreach}
+            {else}
+                <p>No hay cupones</p>
+            {/if}
+            </div>
+        </div>
+    </div>
+</section>

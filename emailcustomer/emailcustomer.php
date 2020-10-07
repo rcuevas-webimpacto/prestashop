@@ -61,22 +61,30 @@ class Emailcustomer extends Module
     {
         include(dirname(__FILE__).'/sql/install.php');
 
-        return parent::install() &&
-            $this->registerHook('actionValidateOrder');
+        return parent::install() && $this->_installSql() &&
+            $this->registerHook('actionValidateOrder') &&
+            $this->registerHook('actionFrontControllerSetMedia') &&
+            $this->registerHook('displayOrderConfirmation') &&
+            $this->registerHook('displayOrderConfirmation1');
     }
 
     public function uninstall()
     {
         include(dirname(__FILE__).'/sql/uninstall.php');
 
-        return parent::uninstall() && $this->uninstallSql();
+        return parent::uninstall() && $this->_uninstallSql();
     }
 
-    protected function uninstallSql()
-    {
-        $sqluninstall=Db::getInstance()->execute('DROP TABLE IF EXISTS '._DB_PREFIX_.'emailcustomer');
+    protected function _installSql(){
+        $sqlcuponglobal=Db::getInstance()->execute('CREATE TABLE IF NOT EXISTS '._DB_PREFIX_.'cuponglobal(id int(10) NOT NULL AUTO_INCREMENT, primary key(id), cantidadgastada float(20,6), cuponcode varchar(255), id_customer int(10), email_customer varchar(255), firstname_customer varchar(255), lastname_customer varchar(255)) ENGINE=' . _MYSQL_ENGINE_ . ' DEFAULT CHARSET=utf8;');
+        return $sqlcuponglobal;
+    }
 
-        return $sqluninstall;
+    protected function _uninstallSql()
+    {
+        $sqluninstall1=Db::getInstance()->execute('DROP TABLE IF EXISTS '._DB_PREFIX_.'emailcustomer');
+        $sqluninstall2=Db::getInstance()->execute('DROP TABLE IF EXISTS '._DB_PREFIX_.'cuponglobal');
+        return $sqluninstall1.$sqluninstall2;
     }
 
     /**
@@ -88,6 +96,8 @@ class Emailcustomer extends Module
          * If values have been submitted in the form, process.
          */
         if (((bool)Tools::isSubmit('guardar')) == true) { //submitEmailcustomerModule
+            $this->postProcess();
+        } else if(((bool)Tools::isSubmit('guardar2')) == true) {
             $this->postProcess();
         }
 
@@ -120,17 +130,18 @@ class Emailcustomer extends Module
 
         $helper->identifier = $this->identifier;
         $helper->submit_action = 'guardar'; //submitEmailcustomerModule
+        $helper->submit_action = 'guardar2';
         $helper->currentIndex = $this->context->link->getAdminLink('AdminModules', false)
             .'&configure='.$this->name.'&tab_module='.$this->tab.'&module_name='.$this->name;
         $helper->token = Tools::getAdminTokenLite('AdminModules');
 
         $helper->tpl_vars = array(
-            'fields_value' => $this->getConfigFormValues(['user_id','moneydiscount','discount','codediscount']), /* Add values for your inputs */
+            'fields_value' => $this->getConfigFormValues('user_id', 'moneydiscount', 'discount', 'codediscount'), /* Add values for your inputs */
             'languages' => $this->context->controller->getLanguages(),
             'id_language' => $this->context->language->id,
         );
 
-        return $helper->generateForm(array($this->getConfigForm()));
+        return $helper->generateForm(array($this->getConfigForm(), $this->configForm2()));
     }
 
     /**
@@ -141,11 +152,12 @@ class Emailcustomer extends Module
         return array(
             'form' => array(
                 'legend' => array(
-                'title' => $this->l('Configuracion del cupon descuento'),
-                'icon' => 'icon-cogs',
-                'id'=> 'formemail',
-                'method'=> $_POST,
+                    'title' => $this->l('Configuracion del cupon descuento INDIVIDUAL'),
+                    'icon' => 'icon-cogs',
+                    'id'=> 'formemail',
+                    'method'=> $_POST,
                 ),
+
                 'input' => array(
                     array(
                         'type' => 'html',
@@ -190,7 +202,32 @@ class Emailcustomer extends Module
         );
     }
 
-    // %percentage%
+    protected function configForm2()
+    {
+        return array(
+            'form' => array(
+                'legend' => array(
+                    'title' => $this->l('Configuracion del cupon descuento GLOBAL'),
+                    'icon' => 'icon-cogs',
+                    'id'=> 'formemailglobal',
+                ),
+                'input' => array(
+                    array(
+                        'type' => 'text',
+                        'label' => $this->l('Cantidad a gastar'),
+                        'desc' => $this->l('Cantidad que tiene que gastar el cliente para que se le genere el cupón global'),
+                        'name' => 'MINIMOREQUERIDO',
+                        'required'=> true,
+                        'suffix' => '€',
+                    ),
+                ),
+                'submit' => array(
+                    'title' => $this->l('Guardar'),
+                    'name'=> 'guardar2',
+                ),
+            )
+        );
+    }
 
     /**
      * Set values for the inputs.
@@ -202,6 +239,7 @@ class Emailcustomer extends Module
             'discount' => Configuration::get('discount'),
             'codediscount'=>Configuration::get('codediscount'),
             'user_id'=> Configuration::get('user_id'),
+            'MINIMOREQUERIDO' => Configuration::get('MINIMOREQUERIDO'),
         );
     }
 
@@ -216,89 +254,195 @@ class Emailcustomer extends Module
             Configuration::updateValue($key, Tools::getValue($key));
         }
 
-        $id_emailcustomer=(int)Tools::getValue('id_emailcustomer');
-        $moneydiscount=(int)(Tools::getValue('moneydiscount'));
-        $discount=(int)(Tools::getValue('discount'));
-        $codediscount=(string)(Tools::getValue('codediscount'));
-        $user_id=(int)(Tools::getValue('user_id'));
-
         if (Tools::isSubmit('guardar')) {
+            $id_emailcustomer=(int)Tools::getValue('id_emailcustomer');
+            $moneydiscount=(int)(Tools::getValue('moneydiscount'));
+            $discount=(int)(Tools::getValue('discount'));
+            $codediscount=(string)(Tools::getValue('codediscount'));
+            $user_id=(int)(Tools::getValue('user_id'));
+
             Db::getInstance()->insert('emailcustomer', array(
                 'moneydiscount'=>$moneydiscount,
                 'discount'=>$discount,
                 'codediscount'=>$codediscount,
                 'user_id'=>$user_id,
             ));
+        } else if (Tools::isSubmit('guardar2')) {
+            Configuration::updateValue('MINIMOREQUERIDO',Tools::getValue('MINIMOREQUERIDO'));
         }
     }
 
     public function hookActionValidateOrder($params)
     {
-        $id_customer=$this->context->customer->id;
+        $numrows=Db::getInstance()->getValue(sprintf("SELECT COUNT(*) AS num FROM ps_emailcustomer WHERE user_id= %d"),(int)pSQL($params['customer']->id));
 
-        $moneydiscount=Db::getInstance()->executeS("SELECT `moneydiscount` from `"._DB_PREFIX_."emailcustomer` WHERE `user_id`=".$id_customer."");
-        $discount=Db::getInstance()->executeS("SELECT `discount` from `"._DB_PREFIX_."emailcustomer` WHERE `user_id`=".$id_customer."");
-        $codediscount=Db::getInstance()->executeS("SELECT `codediscount` from `"._DB_PREFIX_."emailcustomer` WHERE `user_id`=".$id_customer."");
-
-        $idLang=(int)(Configuration::get('PS_LANG_DEFAULT'));
-        $shopemail=Configuration::get('PS_SHOP_EMAIL');
-        $shopname=Configuration::get('PS_SHOP_NAME');
-        $sumpaid=Db::getInstance()->executeS("SELECT SUM(`total_paid`) AS `sumpaid` from `"._DB_PREFIX_."orders` WHERE `id_customer`=".$id_customer." && `current_state`=2");
-        $templateVars=array(
-            '{firstname}'=>$this->context->customer->firstname,
-            '{lastname}'=>$this->context->customer->lastname,
-            '{sumpaid}'=>$sumpaid,
-            '{codediscount}'=>$codediscount,
-        );
-
-        if ($sumpaid >= $moneydiscount) {
-            $cr = new CartRule();
-            $cr->date_from = date('Y-m-d H:i:s');
-            $cr->date_to = '2050-12-31 00:00:00';
-            $cr->name[Configuration::get('PS_LANG_DEFAULT')] = 'Descuento';
-            $cr->quantity = 1;
-            $cr->codediscount= $codediscount;
-            $cr->discount = $discount;
-            $cr->free_shipping = false;
-            $cr->active = true;
-            $cr->id_customer = $this->context->customer->id;
-            $cr->add();
-
-            Mail::Send(
-                $idLang, //defaut language id
-                'descuento', //email template file to be use
-                'Cupon descuento', //email subject
-                $templateVars, //email vars
-                $this->context->customer->email, //receiver email address
-                null, //receiver name
-                $shopemail, //from email address
-                $shopname,  //from name
-                null,
-                true, //mode smtp
-                _PS_ROOT_DIR_.'/modules/emailcustomer/mails', //custom template path
-                false, //die
-                null, //shop id
-                null,
-                null
+        if ($numrows == 0) {
+            //cupones para cualquier usuario
+            $customer_id=$params['customer']->id;
+            $customer=$params['customer'];
+            $order=$params['order'];
+            $totalgastado=Db::getInstance()->getValue(
+                sprintf(
+                    "SELECT SUM(total_paid) FROM ps_orders WHERE id_customer = %d", 
+                    (int)pSQL($customer_id)
+                )
             );
-        } else {
-            Mail::Send(
-                $idLang, //defaut language id
-                'contact', //email template file to be use
-                'Total gastado', //email subject
-                $templateVars, //email vars
-                $this->context->customer->email, //receiver email address
-                null, //receiver name
-                $shopemail, //from email address
-                $shopname,  //from name
-                null,
-                true, //mode smtp
-                _PS_ROOT_DIR_.'/modules/emailcustomer/mails', //custom template path
-                false, //die
-                null, //shop id
-                null,
-                null
+            $totalacumulado=Db::getInstance()->getValue(
+                sprintf(
+                    "SELECT SUM(cantidadgastada) FROM ps_cuponglobal WHERE id_customer = %d", 
+                    (int)pSQL($customer_id)
+                )
             );
+            $totalgastado_ = $totalgastado - $totalacumulado;
+
+            $minimorequerido = Configuration::get('MINIMOREQUERIDO');
+
+            if ($totalgastado_ > $minimorequerido) {
+                $cartRuleObj = new CartRule();
+                $cartRuleObj->date_from = date('Y-m-d H:i:s');
+                $cartRuleObj->date_to = '2046-12-12 00:00:00';
+                $cartRuleObj->name[Configuration::get('PS_LANG_DEFAULT')] = 'Cupon descuento';
+                $cartRuleObj->quantity = 1;
+                $code = Tools::passwdGen();
+                while (CartRule::cartRuleExists($code)) { // let's make sure there is no duplicate
+                    $code = Tools::passwdGen();
+                }
+                $cartRuleObj->code = $code;
+                $cartRuleObj->quantity_per_user = 1;
+                $cartRuleObj->reduction_percent = 20;
+                $cartRuleObj->reduction_amount = 0;
+                $cartRuleObj->free_shipping = 0;
+                $cartRuleObj->active = 1;
+                $cartRuleObj->minimum_amount = 0;
+                $cartRuleObj->id_customer = $customer_id;
+                $cartRuleObj->add();
+
+                Db::getInstance()->insert('cuponglobal', array(
+                    'cantidadgastada'=>$order->total_paid,
+                    'cuponcode'=>$code,
+                    'id_customer'=>$customer_id,
+                    'email_customer'=>$customer->email,
+                    'firstname_customer'=>$customer->firstname,
+                    'lastname_customer'=>$customer->lastname,
+                ));
+
+                Mail::Send(
+                    $this->context->language->id,
+                    'coupon',
+                    Mail::l('Cupon descuento'),
+                    array(
+                        '{firstname}' => $customer->firstname,
+                        '{lastname}' => $customer->lastname,
+                        '{email}' => $customer->email,
+                        '{passwd}' => Tools::getValue('passwd'),
+                        '{coupon}' => $code,
+                    ),
+                    $customer->email,
+                    $customer->firstname.' '.$customer->lastname,
+                    Configuration::get('PS_SHOP_EMAIL'),
+                    Configuration::get('PS_SHOP_NAME'),
+                    null,
+                    true,
+                    _PS_ROOT_DIR_.'/modules/emailcustomer/mails',
+                    false,
+                    null,
+                    null,
+                    null
+                );
+                //Db::getInstance()->execute(sprintf("INSERT INTO ps_cuponglobal(cantidadgastada, cuponcode, id_customer, email_customer, firstname_customer, lastname_customer) VALUES(%d, '%s', %d, '%s', '%s', '%s')"), (float)pSQL($order->total_paid), (string)pSQL($code), (int)pSQL($customer_id), (string)pSQL($customer->email), (string)pSQL($customer->firstname), (string)pSQL($customer->lastname));
+                //Db::getInstance()->execute("INSERT INTO ps_cuponglobal(cantidadgastada, cuponcode, id_customer, email_customer, firstname_customer, lastname_customer) VALUES(".$order->total_paid.", '".$code."', ".$customer_id.", '".$customer->email."', '".$customer->firstname."', '".$customer->lastname."')");
+            } else {
+                return 'Error en el cupon global';
+            }
+        } else if ($numrows > 0) {
+            //cupones para usuarios registrados asignandolos individualmente
+            $id_customer=$this->context->customer->id;
+
+            $moneydiscount=Db::getInstance()->executeS("SELECT `moneydiscount` from `"._DB_PREFIX_."emailcustomer` WHERE `user_id`=".$id_customer."");
+            $discount=Db::getInstance()->executeS("SELECT `discount` from `"._DB_PREFIX_."emailcustomer` WHERE `user_id`=".$id_customer."");
+            $codediscount=Db::getInstance()->executeS("SELECT `codediscount` from `"._DB_PREFIX_."emailcustomer` WHERE `user_id`=".$id_customer."");
+            //$sumpaid=Db::getInstance()->executeS("SELECT SUM(`total_paid`) AS `sumpaid` from `"._DB_PREFIX_."orders` WHERE `id_customer`=".$id_customer." && `current_state`=2");
+            $sumpaid=Db::getInstance()->getValue(sprintf("SELECT SUM(`total_paid`) AS `sumpaid` from `"._DB_PREFIX_."orders` WHERE `id_customer`= %d && `current_state`=2"), (int)pSQL($id_customer));
+
+            if ($sumpaid >= $moneydiscount) {
+                $cr = new CartRule();
+                $cr->date_from = date('Y-m-d H:i:s');
+                $cr->date_to = '2050-12-31 00:00:00';
+                $cr->name[Configuration::get('PS_LANG_DEFAULT')] = 'Descuento';
+                $cr->quantity = 1;
+                $cr->codediscount= $codediscount;
+                $cr->discount = $discount;
+                $cr->free_shipping = false;
+                $cr->active = true;
+                $cr->id_customer = $this->context->customer->id;
+                $cr->add();
+
+                Mail::Send(
+                    (int)(Configuration::get('PS_LANG_DEFAULT')),
+                    'descuento',
+                    Mail::l('Cupon descuento'),
+                    array(
+                        '{firstname}'=>$this->context->customer->firstname,
+                        '{lastname}'=>$this->context->customer->lastname,
+                        '{codediscount}'=>$codediscount,
+                    ),
+                    $this->context->customer->email,
+                    null,
+                    Configuration::get('PS_SHOP_EMAIL'),
+                    Configuration::get('PS_SHOP_NAME'),
+                    null,
+                    true,
+                    _PS_ROOT_DIR_.'/modules/emailcustomer/mails',
+                    false,
+                    null,
+                    null,
+                    null
+                );
+            } else {
+                Mail::Send(
+                    (int)(Configuration::get('PS_LANG_DEFAULT')),
+                    'contact',
+                    Mail::l('Total gastado'),
+                    array(
+                        '{firstname}'=>$this->context->customer->firstname,
+                        '{lastname}'=>$this->context->customer->lastname,
+                        '{sumpaid}'=>$sumpaid,
+                    ),
+                    $this->context->customer->email,
+                    null,
+                    Configuration::get('PS_SHOP_EMAIL'),
+                    Configuration::get('PS_SHOP_NAME'),
+                    null,
+                    true,
+                    _PS_ROOT_DIR_.'/modules/emailcustomer/mails',
+                    false,
+                    null,
+                    null
+                );
+            }
         }
+    }
+
+    public function hookActionFrontControllerSetMedia($params)
+    {
+        $this->context->controller->addCSS($this->_path."/views/css/scratch.scs", "all");
+        $this->context->controller->addJS($this->_path."/views/js/scratch.js");
+    }
+
+    public function hookDisplayOrderConfirmation()
+    {
+        return $this->l('Desliza hacia abajo para conseguir tu rasca y gana');
+    }
+
+    public function hookDisplayOrderConfirmation1($params)
+    {
+        $customer_id=$params['cart']->id_customer;
+        $coupon=Db::getInstance()->executeS("SELECT cuponcode, MAX(id) FROM ps_cuponglobal WHERE id_customer= ".$customer_id."");
+        $this->context->smarty->assign('coupon',$coupon); 
+        $this->context->smarty->assign(array(
+            'urlcss'=>$this->_path.'/views/css/scratch.scss',
+            'urljs'=>$this->_path.'/views/js/scratch.js',
+        ));
+        return $this->display(__FILE__,'views/templates/hook/scratch.tpl');
     }
 }

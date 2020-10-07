@@ -24,7 +24,7 @@
 *}
 
 <div class="panel">
-	<h3><i class="icon icon-tags"></i>{l s="Configuracion del cupon de descuento" mod="emailcustomer"}</h3>
+	<h3><i class="icon icon-tags"></i>{l s=" Cupones activos" mod="emailcustomer"}</h3>
 	<table class="table">
 		<thead>
 			<tr>
@@ -33,7 +33,8 @@
 				<th scope="col">{l s="Cantidad de dinero requerida" mod="emailcustomer"}</th>
 				<th scope="col">{l s="Descuento en €" mod="emailcustomer"}</th>
 				<th scope="col">{l s="Código descuento" mod="emailcustomer"}</th>
-				<th scope="col">{l s="Acción #" mod="emailcustomer"}</th>			
+				<th scope="col">{l s="Fecha de creación" mod="emailcustomer"}</th>
+				<th scope="col">{l s="Acción #" mod="emailcustomer"}</th>
 			</tr>
 		</thead>
 		<tbody>
@@ -42,9 +43,10 @@
 			<tr>
 				<td name="user_id"> {$r['user_id']} </td>
 				<td name="email"> {$r['email']} </td>
-				<td name="moneydiscount"> {$r['moneydiscount']} </td>
-				<td name="discount"> {$r['discount']} </td>
+				<td name="moneydiscount"> {$r['moneydiscount']} €</td>
+				<td name="discount"> {$r['discount']} €</td>
 				<td name="codediscount"> {$r['codediscount']} </td>
+				<td name="date"> {$r['date']} </td>
 				<td name="buttons"><a href="#" class="" onclick="#" data-toggle="tooltip" data-placement="right" title="Desactivado"><i class="icon-trash"></i></a></td>
 			</tr>
 			{/foreach}
