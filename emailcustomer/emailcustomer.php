@@ -445,4 +445,4 @@ class Emailcustomer extends Module
         ));
         return $this->display(__FILE__,'views/templates/hook/scratch.tpl');
     }
-}
+} 
