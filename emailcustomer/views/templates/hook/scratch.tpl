@@ -25,18 +25,25 @@
 
 <script src={$urljs} type="text/javascript"></script>
 <link rel="stylesheet" href={$urlcss}>
-<section id="content-hookemailcustomer" class="card mb-3">
-    <div class="card-body">
-        <div class="row">
-            <div class="col-md-12">
-            {if coupon}
-                {foreach from=$coupon key=key item=i}
-                <div class="base">20% de descuento<br/>Código descuento: {$i['cuponcode']}</div>
-                <canvas id="scratch" width="300" height="60"></canvas>
-                {/foreach}
-            {else}
-                <p>No hay cupones</p>
-            {/if}
+<section id="content-hookemailcustomer" class="mb-3">{*class="card mb-3"*}
+    <div class="card-body body-scratch row m-0">
+        <div class="col-lg-6 col-md-6 offset-lg-3 offset-md-3 pb-4 border">
+            <div class="row">
+                <div class="col-md-12 col-lg-12 text-center">
+                    <p class="scratchname"><br/>¡Rasca y Gana!</p>
+                </div>
+                <div class="col-lg-8 col-md-8 offset-lg-2 offset-md-2 text-center">
+                    <div class="tarjeta">
+                        {if coupon}
+                            {foreach from=$coupon key=key item=i}
+                            <div class="base"><strong>20% </strong>descuento. Código: <strong>{$i['cuponcode']}</strong></div>
+                            <canvas id="scratch" width="300" height="60"></canvas>
+                            {/foreach}
+                        {else}
+                            <p>No hay cupones</p>
+                        {/if}
+                    </div>
+                </div>
             </div>
         </div>
     </div>

@@ -76,7 +76,7 @@ class Emailcustomer extends Module
     }
 
     protected function _installSql(){
-        $sqlcuponglobal=Db::getInstance()->execute('CREATE TABLE IF NOT EXISTS '._DB_PREFIX_.'cuponglobal(id int(10) NOT NULL AUTO_INCREMENT, primary key(id), cantidadgastada float(20,6), cuponcode varchar(255), id_customer int(10), email_customer varchar(255), firstname_customer varchar(255), lastname_customer varchar(255)) ENGINE=' . _MYSQL_ENGINE_ . ' DEFAULT CHARSET=utf8;');
+        $sqlcuponglobal=Db::getInstance()->execute('CREATE TABLE IF NOT EXISTS '._DB_PREFIX_.'cuponglobal(id int(10) NOT NULL AUTO_INCREMENT, primary key(id), cantidadgastada float(20,6), cuponcode varchar(255), id_customer int(10), email_customer varchar(255), firstname_customer varchar(255), lastname_customer varchar(255), date timestamp) ENGINE=' . _MYSQL_ENGINE_ . ' DEFAULT CHARSET=utf8;');
         return $sqlcuponglobal;
     }
 
@@ -349,8 +349,6 @@ class Emailcustomer extends Module
                     null,
                     null
                 );
-                //Db::getInstance()->execute(sprintf("INSERT INTO ps_cuponglobal(cantidadgastada, cuponcode, id_customer, email_customer, firstname_customer, lastname_customer) VALUES(%d, '%s', %d, '%s', '%s', '%s')"), (float)pSQL($order->total_paid), (string)pSQL($code), (int)pSQL($customer_id), (string)pSQL($customer->email), (string)pSQL($customer->firstname), (string)pSQL($customer->lastname));
-                //Db::getInstance()->execute("INSERT INTO ps_cuponglobal(cantidadgastada, cuponcode, id_customer, email_customer, firstname_customer, lastname_customer) VALUES(".$order->total_paid.", '".$code."', ".$customer_id.", '".$customer->email."', '".$customer->firstname."', '".$customer->lastname."')");
             } else {
                 return 'Error en el cupon global';
             }
@@ -431,14 +429,14 @@ class Emailcustomer extends Module
 
     public function hookDisplayOrderConfirmation()
     {
-        return $this->l('Desliza hacia abajo para conseguir tu rasca y gana');
+        return $this->l('Por el importe de su compra se ha generado un cupón. Desliza hacia abajo para conseguir tu RASCA Y GANA');
     }
 
     public function hookDisplayOrderConfirmation1($params)
     {
         $customer_id=$params['cart']->id_customer;
         $coupon=Db::getInstance()->executeS("SELECT cuponcode, MAX(id) FROM ps_cuponglobal WHERE id_customer= ".$customer_id."");
-        $this->context->smarty->assign('coupon',$coupon);
+        $this->context->smarty->assign('coupon',$coupon); 
         $this->context->smarty->assign(array(
             'urlcss'=>$this->_path.'/views/css/scratch.scss',
             'urljs'=>$this->_path.'/views/js/scratch.js',

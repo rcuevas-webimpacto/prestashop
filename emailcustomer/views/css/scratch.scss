@@ -26,25 +26,36 @@
 * to avoid any conflicts with others containers.
 */
 
-/*.card{
+@import url('https://fonts.googleapis.com/css2?family=Sansita+Swashed:wght@800&display=swap'); //font-family: 'Sansita Swashed', cursive;
+
+#content-hookemailcustomer {
+  //widows: 10;
+  //height: 40%;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  word-wrap: break-word;
+  background-color:#fff;
+  background-clip: border-box;
+  //border: 1px solid rgba(0,0,0,.125);
+}
+.tarjeta {
   width: 300px;
   height: 60px;
   position: relative;
   box-shadow: 1px 2px 6px rgba(0, 0, 0, 0.2);
-   } */
-
-#content-hookemailcustomer {
-  widows: 1000px;;
-  height: 150px;
-}   
+  margin: 10px auto;
+  background-color: #f7e9ce; 
+}
 .base, #scratch {
 cursor: default;
 height: 60px;
 width: 300px;
-  position: absolute;
-  top: 0;
-  left: 0;
-  cursor: grabbing;
+position: absolute;
+top: 0;
+left: 0;
+cursor: grabbing;
 }
 .base {
 line-height: 60px;
@@ -54,4 +65,24 @@ text-align: center;
 -webkit-tap-highlight-color: rgba(0, 0, 0, 0); 
 -webkit-touch-callout: none;
 -webkit-user-select: none;
+}
+//___________
+
+.body-scratch {
+  background-color:#c30606;
+}
+.border {
+  border: 2px solid #eac887 !important; 
+  border-radius: 16px;
+  box-shadow: 2px 2px 1px rgba(0,0,0,0.5);
+  background-color: #c30606;
+  justify-content: center;
+  background-image: url("../img/gold-star.png");
+  background-size: cover;
+}
+.scratchname {
+  font-family: 'Sansita Swashed', cursive;
+  font-size:3em;
+  color: #eac887;
+  text-shadow: 2px 2px 1px rgba(0,0,0,0.5);
 }
